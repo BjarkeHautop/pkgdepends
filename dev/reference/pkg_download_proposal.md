@@ -1,0 +1,657 @@
+# R6 class for package downloads
+
+Download packages with their dependencies, from various sources.
+
+## Usage
+
+``` r
+new_pkg_download_proposal(refs, ...)
+```
+
+## Arguments
+
+- refs:
+
+  Package names or references. See ['Package
+  references'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_refs.md)
+  for the syntax.
+
+- ...:
+
+  Additional arguments, passed to
+  [`pkg_download_proposal$new()`](#method-new).
+
+## Value
+
+`new_pkg_download_proposal()` returns a new `pkg_download_proposal`
+object.
+
+## Details
+
+`new_pkg_download_proposal()` creates a new object from the
+`pkg_download_proposal` class, that can be used to look up and download
+R packages and their dependencies. The advantage of
+`new_pkg_download_proposal()` compared to using the
+pkg_download_proposal constructor directly is that it avoids making
+pkgdepends a build time dependency.
+
+Typical workflow to download a set of packages:
+
+1.  Create a `pkg_download_proposal` object with
+    `new_pkg_download_proposal()`.
+
+2.  Resolve all possible dependencies with
+    [`pkg_download_proposal$resolve()`](#method-resolve).
+
+3.  Download all files with
+    [`pkg_download_proposal$download()`](#method-download).
+
+4.  Get the data about the packages and downloads with
+    [`pkg_download_proposal$get_downloads()`](#method-get-downloads).
+
+## Methods
+
+### Public methods
+
+- [`pkg_download_proposal$new()`](#method-pkg_download_proposal-initialize)
+
+- [`pkg_download_proposal$get_refs()`](#method-pkg_download_proposal-get_refs)
+
+- [`pkg_download_proposal$get_config()`](#method-pkg_download_proposal-get_config)
+
+- [`pkg_download_proposal$resolve()`](#method-pkg_download_proposal-resolve)
+
+- [`pkg_download_proposal$async_resolve()`](#method-pkg_download_proposal-async_resolve)
+
+- [`pkg_download_proposal$get_resolution()`](#method-pkg_download_proposal-get_resolution)
+
+- [`pkg_download_proposal$download()`](#method-pkg_download_proposal-download)
+
+- [`pkg_download_proposal$async_download()`](#method-pkg_download_proposal-async_download)
+
+- [`pkg_download_proposal$get_downloads()`](#method-pkg_download_proposal-get_downloads)
+
+- [`pkg_download_proposal$stop_for_download_error()`](#method-pkg_download_proposal-stop_for_download_error)
+
+- [`pkg_download_proposal$format()`](#method-pkg_download_proposal-format)
+
+- [`pkg_download_proposal$print()`](#method-pkg_download_proposal-print)
+
+- [`pkg_download_proposal$clone()`](#method-pkg_download_proposal-clone)
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$new()`
+
+Create a new `pkg_download_proposal` object. Consider using
+`new_pkg_download_proposal()` instead of calling the constructor
+directly.
+
+The returned object can be used to look up (recursive) dependencies of R
+packages from various sources, and then to download the package files.
+
+#### Usage
+
+    pkg_download_proposal$new(refs, config = list(), remote_types = NULL)
+
+#### Arguments
+
+- `refs`:
+
+  Package names or references. See ['Package
+  references'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_refs.md)
+  for the syntax.
+
+- `config`:
+
+  Configuration options, a named list. See
+  ['Configuration'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_config.md).
+
+- `remote_types`:
+
+  Custom remote ref types, this is for advanced use, and experimental
+  currently.
+
+  ##### Examples
+
+      pdl <- pkg_download_proposal$new("r-lib/pkgdepends")
+      pdl
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$get_refs()`
+
+The package refs that were used to create the `pkg_download_proposal`
+object.
+
+#### Usage
+
+    pkg_download_proposal$get_refs()
+
+#### Returns
+
+A character vector of package refs that were used to create the
+`pkg_download_proposal` object.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$get_config()`
+
+Configuration options for the `pkg_download_proposal` object. See
+['Configuration'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_config.md)
+for details.
+
+#### Usage
+
+    pkg_download_proposal$get_config()
+
+#### Returns
+
+Named list. See
+['Configuration'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_config.md)
+for the configuration options.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$resolve()`
+
+Resolve the dependencies of the specified package references. This
+usually means downloading metadata from CRAN and Bioconductor, unless
+already cached, and also from GitHub if GitHub refs were included,
+either directly or indirectly. See ['Dependency
+resolution'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_resolution.md)
+for details.
+
+#### Usage
+
+    pkg_download_proposal$resolve()
+
+#### Returns
+
+The `pkg_download_proposal` object itself, invisibly.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$async_resolve()`
+
+The same as [`resolve()`](#method-resolve), but asynchronous. This
+method is for advanced use.
+
+#### Usage
+
+    pkg_download_proposal$async_resolve()
+
+#### Returns
+
+A deferred value.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$get_resolution()`
+
+Query the result of the dependency resolution. This method can be called
+after [`resolve()`](#method-resolve) has completed.
+
+#### Usage
+
+    pkg_download_proposal$get_resolution()
+
+#### Returns
+
+A
+[pkg_resolution_result](https://r-lib.github.io/pkgdepends/dev/reference/pkg_resolution.md)
+object, which is also a data frame. See ['Dependency
+resolution'](https://r-lib.github.io/pkgdepends/dev/reference/pkg_resolution.md)
+for its columns.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$download()`
+
+Download all resolved packages. It uses the package cache in the
+pkgcache package by default, to avoid downloads if possible.
+
+#### Usage
+
+    pkg_download_proposal$download()
+
+#### Returns
+
+The `pkg_download_proposal` object, invisibly.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$async_download()`
+
+The same as [`download()`](#method-download), but asynchronous. This
+method is for advanced use.
+
+#### Usage
+
+    pkg_download_proposal$async_download()
+
+#### Returns
+
+A deferred value.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$get_downloads()`
+
+Returns the summary of the package downloads.
+
+#### Usage
+
+    pkg_download_proposal$get_downloads()
+
+#### Returns
+
+A
+[pkg_download_result](https://r-lib.github.io/pkgdepends/dev/reference/pkg_downloads.md)
+object, which is a list. See
+[pkg_download_result](https://r-lib.github.io/pkgdepends/dev/reference/pkg_downloads.md)
+for details.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$stop_for_download_error()`
+
+Throw and error if the some of the downloads have failed for the most
+recent [`pkg_download_proposal$download()`](#method-download) call.
+
+#### Usage
+
+    pkg_download_proposal$stop_for_download_error()
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$format()`
+
+Format a `pkg_download_proposal` object, typically for printing.
+
+#### Usage
+
+    pkg_download_proposal$format(...)
+
+#### Arguments
+
+- `...`:
+
+  not used currently.
+
+#### Returns
+
+Nothing. A character vector, each element should be a line in the
+printout.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$print()`
+
+Prints a `pkg_download_proposal` object to the screen. The printout
+includes:
+
+- The package refs.
+
+- Whether the object has the resolved dependencies.
+
+- Whether the resolution had errors.
+
+- Whether the downloads were completed.
+
+- Whether the downloads had errors.
+
+- Advice on which methods to call next.
+
+See the example below.
+
+#### Usage
+
+    pkg_download_proposal$print(...)
+
+#### Arguments
+
+- `...`:
+
+  not used currently.
+
+#### Returns
+
+The `pkg_download_proposal` object itself, invisibly.
+
+------------------------------------------------------------------------
+
+### `pkg_download_proposal$clone()`
+
+The objects of this class are cloneable with this method.
+
+#### Usage
+
+    pkg_download_proposal$clone(deep = FALSE)
+
+#### Arguments
+
+- `deep`:
+
+  Whether to make a deep clone.
+
+## Examples
+
+``` r
+# Method get_refs()
+pdl <- new_pkg_download_proposal(c("pak", "jsonlite"))
+pdl$get_refs()
+#> [1] "pak"      "jsonlite"
+# Method get_config()
+pdl <- new_pkg_download_proposal("pak")
+pdl$get_config()
+#> # pkg config
+#> ## build_vignettes
+#> <default>
+#> [1] FALSE
+#> 
+#> ## sysreqs_verbose
+#> <default>
+#> [1] TRUE
+#> 
+#> ## sysreqs_db_update
+#> <default>
+#> [1] TRUE
+#> 
+#> ## metadata_cache_dir
+#> <default>
+#> [1] "/tmp/RtmpWebFEi/file24851f77f1b3"
+#> 
+#> ## configure_args
+#> <default>
+#> character(0)
+#> 
+#> ## platforms
+#> <default>
+#> [1] "x86_64-pc-linux-gnu-ubuntu-24.04"
+#> [2] "source"                          
+#> 
+#> ## goal
+#> <default>
+#> [1] "unknown"
+#> 
+#> ## r_versions
+#> <default>
+#> [1] "4.6.1"
+#> 
+#> ## cache_dir
+#> <default>
+#> [1] "/tmp/RtmpWebFEi/file24854b8dc65a"
+#> 
+#> ## library
+#> <set>
+#> [1] "/tmp/RtmpWebFEi/file2485558a465"
+#> 
+#> ## ignore_dev_library
+#> <default>
+#> [1] TRUE
+#> 
+#> ## metadata_update_after
+#> <default>
+#> Time difference of 24 hours
+#> 
+#> ## sysreqs_update
+#> <default>
+#> [1] TRUE
+#> 
+#> ## include_linkingto
+#> <default>
+#> [1] FALSE
+#> 
+#> ## sysreqs_rspm_repo_id
+#> <default>
+#> [1] "1"
+#> 
+#> ## package_cache_dir
+#> <default>
+#> NULL
+#> 
+#> ## sysreqs_rspm_url
+#> <default>
+#> [1] "https://packagemanager.posit.co"
+#> 
+#> ## sysreqs_sudo
+#> <default>
+#> [1] TRUE
+#> 
+#> ## sysreqs_db_update_timeout
+#> <default>
+#> Time difference of 60 secs
+#> 
+#> ## sysreqs_lookup_system
+#> <default>
+#> [1] TRUE
+#> 
+#> ## git_submodules
+#> <default>
+#> [1] FALSE
+#> 
+#> ## configure_vars
+#> <default>
+#> character(0)
+#> 
+#> ## http_retry
+#> <forwarded>
+#> option: pkg_http_retry, envvar: PKG_HTTP_RETRY
+#> 
+#> ## sysreqs_platform
+#> <default>
+#> [1] "x86_64-pc-linux-gnu-ubuntu-24.04"
+#> 
+#> ## dependencies
+#> <default>
+#> [1] "Depends"   "Imports"   "LinkingTo"
+#> 
+#> ## sysreqs
+#> <default>
+#> [1] TRUE
+#> 
+#> ## sysreqs_dry_run
+#> <default>
+#> [1] FALSE
+#> 
+#> ## windows_archs
+#> <default>
+#> [1] "prefer-x64"
+#> 
+#> ## use_bioconductor
+#> <default>
+#> [1] TRUE
+#> 
+#> ## cran_mirror
+#> <default>
+#>                       CRAN 
+#> "https://cran.rstudio.com" 
+#> 
+# Method resolve()
+pdl <- new_pkg_download_proposal("pak")
+pdl$resolve()
+pdl$get_resolution()
+#> # A data frame: 2 × 35
+#>   ref   type     direct directpkg status package version license
+#>   <chr> <chr>    <lgl>  <lgl>     <chr>  <chr>   <chr>   <chr>  
+#> 1 pak   standard TRUE   TRUE      OK     pak     0.11.1  GPL-3  
+#> 2 pak   standard TRUE   TRUE      OK     pak     0.11.1  GPL-3  
+#> # ℹ 27 more variables: needscompilation <lgl>, priority <chr>,
+#> #   md5sum <chr>, sha256 <chr>, filesize <int>, built <chr>,
+#> #   platform <chr>, rversion <chr>, repotype <chr>, repodir <chr>,
+#> #   target <chr>, deps <list>, mirror <chr>, sources <list>,
+#> #   remote <list>, error <list>, metadata <list>, extra <list>,
+#> #   dep_types <list>, params <list>, sysreqs <chr>, os_type <chr>,
+#> #   cache_status <chr>, sysreqs_packages <list>, …
+# Method get_resolution()
+pdl <- new_pkg_download_proposal("r-lib/pkgdepends")
+pdl$resolve()
+pdl$get_resolution()
+#> # A data frame: 30 × 35
+#>    ref            type  direct directpkg status package version license
+#>    <chr>          <chr> <lgl>  <lgl>     <chr>  <chr>   <chr>   <chr>  
+#>  1 r-lib/pkgdepe… gith… TRUE   TRUE      OK     pkgdep… 0.9.1.… MIT + …
+#>  2 callr          stan… FALSE  FALSE     OK     callr   3.8.0   MIT + …
+#>  3 cli            stan… FALSE  FALSE     OK     cli     3.6.6   MIT + …
+#>  4 curl           stan… FALSE  FALSE     OK     curl    7.1.0   MIT + …
+#>  5 desc           stan… FALSE  FALSE     OK     desc    1.4.3   MIT + …
+#>  6 filelock       stan… FALSE  FALSE     OK     filelo… 1.0.3   MIT + …
+#>  7 jsonlite       stan… FALSE  FALSE     OK     jsonli… 2.0.0   MIT + …
+#>  8 lpSolve        stan… FALSE  FALSE     OK     lpSolve 5.6.23  LGPL-2 
+#>  9 otel           stan… FALSE  FALSE     OK     otel    0.2.0   MIT + …
+#> 10 pkgbuild       stan… FALSE  FALSE     OK     pkgbui… 1.4.8   MIT + …
+#> # ℹ 20 more rows
+#> # ℹ 27 more variables: needscompilation <lgl>, priority <chr>,
+#> #   md5sum <chr>, sha256 <chr>, filesize <int>, built <chr>,
+#> #   platform <chr>, rversion <chr>, repotype <chr>, repodir <chr>,
+#> #   target <chr>, deps <list>, mirror <chr>, sources <list>,
+#> #   remote <list>, error <list>, metadata <list>, extra <list>,
+#> #   dep_types <list>, params <list>, sysreqs <chr>, os_type <chr>, …
+# Method download()
+pdl <- new_pkg_download_proposal("r-lib/pkgdepends")
+pdl$resolve()
+pdl$download()
+#> ℹ Getting 13 pkgs (4.10 MB) and 17 pkgs with unknown sizes
+#> ✔ Got callr 3.8.0 (source) (113.26 kB)
+#> ✔ Got pkgbuild 1.4.8 (source) (51.30 kB)
+#> ✔ Got processx 3.9.0 (source) (195.28 kB)
+#> ✔ Got curl 7.1.0 (source) (717.73 kB)
+#> ✔ Got desc 1.4.3 (source) (80.07 kB)
+#> ✔ Got filelock 1.0.3 (source) (15.44 kB)
+#> ✔ Got cli 3.6.6 (source) (644.13 kB)
+#> ✔ Got otel 0.2.0 (source) (72.58 kB)
+#> ✔ Got ps 1.9.3 (source) (172.43 kB)
+#> ✔ Got R6 2.6.1 (source) (64.51 kB)
+#> ✔ Got zip 3.0.1 (source) (445.73 kB)
+#> ✔ Got lpSolve 5.6.23 (source) (467.59 kB)
+#> ✔ Got tstoml 0.0.0.9000 (source) (176.46 kB)
+#> ✔ Got jsonlite 2.0.0 (source) (1.06 MB)
+#> ✔ Got tsitter 0.1.0.9000 (source) (392.73 kB)
+#> ✔ Got pkgcache 2.2.5.9000 (source) (465.07 kB)
+#> ✔ Got filelock 1.0.3 (x86_64-pc-linux-gnu-ubuntu-24.04) (29.56 kB)
+#> ✔ Got desc 1.4.3 (x86_64-pc-linux-gnu-ubuntu-24.04) (340.59 kB)
+#> ✔ Got otel 0.2.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (283.36 kB)
+#> ✔ Got callr 3.8.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (479.91 kB)
+#> ✔ Got processx 3.9.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (412.56 kB)
+#> ✔ Got lpSolve 5.6.23 (x86_64-pc-linux-gnu-ubuntu-24.04) (375.71 kB)
+#> ✔ Got curl 7.1.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (776.71 kB)
+#> ✔ Got R6 2.6.1 (x86_64-pc-linux-gnu-ubuntu-24.04) (90.09 kB)
+#> ✔ Got ps 1.9.3 (x86_64-pc-linux-gnu-ubuntu-24.04) (515.33 kB)
+#> ✔ Got jsonlite 2.0.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (1.09 MB)
+#> ✔ Got cli 3.6.6 (x86_64-pc-linux-gnu-ubuntu-24.04) (1.35 MB)
+#> ✔ Got zip 3.0.1 (x86_64-pc-linux-gnu-ubuntu-24.04) (959.65 kB)
+#> ✔ Got pkgbuild 1.4.8 (x86_64-pc-linux-gnu-ubuntu-24.04) (212.65 kB)
+#> ✔ Got pkgdepends 0.9.1.9000 (source) (1.76 MB)
+pdl$get_downloads()
+#> # A data frame: 30 × 41
+#>    ref            type  direct directpkg status package version license
+#>    <chr>          <chr> <lgl>  <lgl>     <chr>  <chr>   <chr>   <chr>  
+#>  1 r-lib/pkgdepe… gith… TRUE   TRUE      OK     pkgdep… 0.9.1.… MIT + …
+#>  2 callr          stan… FALSE  FALSE     OK     callr   3.8.0   MIT + …
+#>  3 cli            stan… FALSE  FALSE     OK     cli     3.6.6   MIT + …
+#>  4 curl           stan… FALSE  FALSE     OK     curl    7.1.0   MIT + …
+#>  5 desc           stan… FALSE  FALSE     OK     desc    1.4.3   MIT + …
+#>  6 filelock       stan… FALSE  FALSE     OK     filelo… 1.0.3   MIT + …
+#>  7 jsonlite       stan… FALSE  FALSE     OK     jsonli… 2.0.0   MIT + …
+#>  8 lpSolve        stan… FALSE  FALSE     OK     lpSolve 5.6.23  LGPL-2 
+#>  9 otel           stan… FALSE  FALSE     OK     otel    0.2.0   MIT + …
+#> 10 pkgbuild       stan… FALSE  FALSE     OK     pkgbui… 1.4.8   MIT + …
+#> # ℹ 20 more rows
+#> # ℹ 33 more variables: needscompilation <lgl>, priority <chr>,
+#> #   md5sum <chr>, sha256 <chr>, filesize <int>, built <chr>,
+#> #   platform <chr>, rversion <chr>, repotype <chr>, repodir <chr>,
+#> #   target <chr>, deps <list>, mirror <chr>, sources <list>,
+#> #   remote <list>, error <list>, metadata <list>, extra <list>,
+#> #   dep_types <list>, params <list>, sysreqs <chr>, os_type <chr>, …
+# Method get_downloads()
+pdl <- new_pkg_download_proposal("pkgload")
+pdl$resolve()
+pdl$download()
+#> ℹ Getting 6 pkgs (2.64 MB) and 14 pkgs with unknown sizes, 8 (1.39 MB) cached
+#> ✔ Got glue 1.8.1 (source) (129.79 kB)
+#> ✔ Got lifecycle 1.0.5 (source) (107.14 kB)
+#> ✔ Got pkgload 1.5.3 (source) (89.07 kB)
+#> ✔ Got rprojroot 2.1.1 (source) (59.90 kB)
+#> ✔ Got rlang 1.3.0 (source) (784.08 kB)
+#> ✔ Got fs 2.1.0 (source) (1.47 MB)
+#> ✔ Cached copy of callr 3.8.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of cli 3.6.6 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of desc 1.4.3 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of processx 3.9.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of ps 1.9.3 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of R6 2.6.1 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Got glue 1.8.1 (x86_64-pc-linux-gnu-ubuntu-24.04) (178.50 kB)
+#> ✔ Got lifecycle 1.0.5 (x86_64-pc-linux-gnu-ubuntu-24.04) (135.22 kB)
+#> ✔ Cached copy of otel 0.2.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of pkgbuild 1.4.8 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Got rprojroot 2.1.1 (x86_64-pc-linux-gnu-ubuntu-24.04) (117.22 kB)
+#> ✔ Got pkgload 1.5.3 (x86_64-pc-linux-gnu-ubuntu-24.04) (227.80 kB)
+#> ✔ Got rlang 1.3.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (1.62 MB)
+#> ✔ Got fs 2.1.0 (x86_64-pc-linux-gnu-ubuntu-24.04) (247.06 kB)
+pdl$get_downloads()
+#> # A data frame: 28 × 41
+#>    ref       type     direct directpkg status package   version license
+#>    <chr>     <chr>    <lgl>  <lgl>     <chr>  <chr>     <chr>   <chr>  
+#>  1 callr     standard FALSE  FALSE     OK     callr     3.8.0   MIT + …
+#>  2 cli       standard FALSE  FALSE     OK     cli       3.6.6   MIT + …
+#>  3 desc      standard FALSE  FALSE     OK     desc      1.4.3   MIT + …
+#>  4 fs        standard FALSE  FALSE     OK     fs        2.1.0   MIT + …
+#>  5 glue      standard FALSE  FALSE     OK     glue      1.8.1   MIT + …
+#>  6 lifecycle standard FALSE  FALSE     OK     lifecycle 1.0.5   MIT + …
+#>  7 otel      standard FALSE  FALSE     OK     otel      0.2.0   MIT + …
+#>  8 pkgbuild  standard FALSE  FALSE     OK     pkgbuild  1.4.8   MIT + …
+#>  9 pkgload   standard TRUE   TRUE      OK     pkgload   1.5.3   MIT + …
+#> 10 processx  standard FALSE  FALSE     OK     processx  3.9.0   MIT + …
+#> # ℹ 18 more rows
+#> # ℹ 33 more variables: needscompilation <lgl>, priority <chr>,
+#> #   md5sum <chr>, sha256 <chr>, filesize <int>, built <chr>,
+#> #   platform <chr>, rversion <chr>, repotype <chr>, repodir <chr>,
+#> #   target <chr>, deps <list>, mirror <chr>, sources <list>,
+#> #   remote <list>, error <list>, metadata <list>, extra <list>,
+#> #   dep_types <list>, params <list>, sysreqs <chr>, os_type <chr>, …
+# Method print()
+pdl <- new_pkg_download_proposal("r-lib/pkgdepends")
+pdl
+#> <pkg_download_proposal>
+#> + refs:
+#>   - r-lib/pkgdepends
+#> (use `$resolve()` to resolve dependencies)
+
+pdl$resolve()
+pdl
+#> <pkg_download_proposal>
+#> + refs:
+#>   - r-lib/pkgdepends
+#> + has resolution (+16 dependencies)
+#> (use `$download()` to download packages)
+#> (use `$get_resolution()` to see resolution results)
+
+pdl$download()
+#> ℹ Getting 17 pkgs with unknown sizes, 13 (4.10 MB) cached
+#> ✔ Cached copy of pkgdepends 0.9.1.9000 (source) is the latest build
+#> ✔ Cached copy of pkgcache 2.2.5.9000 (source) is the latest build
+#> ✔ Cached copy of tstoml 0.0.0.9000 (source) is the latest build
+#> ✔ Cached copy of tsitter 0.1.0.9000 (source) is the latest build
+#> ✔ Cached copy of cli 3.6.6 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of curl 7.1.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of desc 1.4.3 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of callr 3.8.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of filelock 1.0.3 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of jsonlite 2.0.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of R6 2.6.1 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of zip 3.0.1 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of lpSolve 5.6.23 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of otel 0.2.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of pkgbuild 1.4.8 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of processx 3.9.0 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+#> ✔ Cached copy of ps 1.9.3 (x86_64-pc-linux-gnu-ubuntu-24.04) is the latest build
+pdl
+#> <pkg_download_proposal>
+#> + refs:
+#>   - r-lib/pkgdepends
+#> + has resolution (+16 dependencies)
+#> + has downloads
+#> (use `$get_resolution()` to see resolution results)
+#> (use `$get_downloads()` to get download data)
+```
