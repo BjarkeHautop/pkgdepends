@@ -58,10 +58,10 @@ pkg_rx()
 #> [1] "^(?:standard::)?(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])(?:@(?:(?:(?<atleast>>=)?(?<version>[0-9]+[-\\.][0-9]+(?:[-\\.][0-9]+)*|current|last))))?$"
 #> 
 #> $type_github
-#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:github::)?(?<username>(?:[a-zA-Z\\d](?:[a-zA-Z\\d-]){0,38}))/(?<repo>[^/@#]+)(?:/(?<subdir>(?:[^@#]*[^@#/])/?))?(?:(?:(?:@(?<commitish>[^*].*)))|(?:(?:#(?<pull>[0-9]+)))|(?:(?:@(?<release>[*]release))))?$"
+#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:github::)?(?<username>(?:[a-zA-Z\\d](?:[a-zA-Z\\d-]){0,38}))/(?<repo>[^/@#]+)(?:/(?<subdir>(?:[^@#]*[^@#/])/?))?(?:(?:(?:@(?<commitish>[^*].*)))|(?:(?:#(?<pull>[0-9]+)))|(?:(?:@(?<release>[*]release))))?/*$"
 #> 
 #> $type_git
-#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:git::)(?:(?<protocol>[^/]*)://)?(?<host>[^/]+)(?<path>[^@]*/)(?<repo>[^/@]*)(?:@(?<commitish>.*))?"
+#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:git::)(?:(?<protocol>[^/]*)://)?(?<host>[^/]+)(?<path>[^@]*/)(?<repo>[^/@]+)/*(?:@(?<commitish>.*))?"
 #> 
 #> $type_local
 #> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?|local::(?<path>.*)|(?<path>(?:/|\\\\|~|[.]/|[.]\\\\|[.]$).*))$"
@@ -79,6 +79,6 @@ pkg_rx()
 #> [1] "(?<repo>[^/@#]+)"
 #> 
 #> $github_url
-#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:github::)?(?:(?:https?://)|(?:(?:ssh://|[^@]+@)))(?:[^/:]+)[/:](?<username>(?:[a-zA-Z\\d](?:[a-zA-Z\\d-]){0,38}))/(?<repo>[^/@#]+?)(?<subdir>)(?:[.]git)?(?:/(?:(?:(?:tree|commit|releases/tag)/(?<commitish>.+$))|(?:pull/(?<pull>.+$))|(?:releases/)(?<release>.+$)))?$"
+#> [1] "^(?:(?<package>[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])=)?(?:github::)?(?:(?:https?://)|(?:(?:ssh://|[^@]+@)))(?:[^/:]+)[/:](?<username>(?:[a-zA-Z\\d](?:[a-zA-Z\\d-]){0,38}))/(?<repo>[^/@#]+?)(?<subdir>)(?:[.]git)?(?:/(?:(?:(?:tree|commit|releases/tag)/(?<commitish>.+?))|(?:pull/(?<pull>.+?))|(?:releases/)(?<release>.+?)))?/*$"
 #> 
 ```

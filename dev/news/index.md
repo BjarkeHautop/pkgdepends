@@ -2,6 +2,10 @@
 
 ## pkgdepends (development version)
 
+- GitHub, GitLab and `git::` remotes now allow trailing slashes,
+  e.g. `github::r-lib/pkgdepends/`
+  (<https://github.com/r-lib/pkgdepends/issues/477>).
+
 - Duplicate system requirement commands (`pre_install` and
   `post_install`) are now deduplicated
   (<https://github.com/r-lib/pak/issues/888>).
