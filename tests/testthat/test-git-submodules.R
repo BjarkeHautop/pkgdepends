@@ -153,6 +153,25 @@ test_that("git_download_repo R package with ignored submodule", {
   expect_snapshot(dir(tmp, recursive = TRUE, all.files = TRUE, no.. = TRUE))
 })
 
+test_that("in_r_build_ignore ignores empty patterns", {
+  # https://github.com/r-lib/pkgdepends/issues/480
+  ignore_file <- tempfile()
+  on.exit(unlink(ignore_file), add = TRUE)
+  writeLines(
+    c(
+      "^src/stan/(?!(src$|src/stan))",
+      "",
+      "^docs$"
+    ),
+    ignore_file
+  )
+
+  expect_equal(
+    in_r_build_ignore(c("src/stan", "src/math", "docs"), ignore_file),
+    c("src/stan" = FALSE, "src/math" = FALSE, "docs" = TRUE)
+  )
+})
+
 test_that("directories", {
   dir.create(tmp <- tempfile())
   on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
