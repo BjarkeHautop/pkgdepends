@@ -499,3 +499,51 @@ test_that("a failing batch resolution fails all its refs (#462)", {
   expect_match(conditionMessage(failed$error[[1]]$parent), "metadata boom")
   expect_match(conditionMessage(failed$error[[2]]$parent), "metadata boom")
 })
+
+test_that("no sysreqs for PPM manylinux binaries", {
+  # PPM's manylinux binaries are self-contained, so we must not compute
+  # (and later install) system packages for them. We do keep the declared
+  # `SystemRequirements` string.
+  ppm <- "https://p3m.dev/cran/__linux__/manylinux_2_28/latest"
+  res <- make_fake_resolution(
+    # manylinux binary: suppressed
+    "curl" = list(
+      mirror = ppm,
+      platform = "x86_64-pc-linux-gnu",
+      sysreqs = "libcurl"
+    ),
+    # source package from the same repo: not suppressed
+    "xml2" = list(mirror = ppm, platform = "source", sysreqs = "libxml2"),
+    # binary from another repo: not suppressed
+    "openssl" = list(
+      mirror = "https://p3m.dev/cran/__linux__/noble/latest",
+      platform = "x86_64-pc-linux-gnu",
+      sysreqs = "openssl"
+    )
+  )
+
+  self <- new.env(parent = emptyenv())
+  self$result <- res
+  private <- list(
+    config = current_config()$update(list(sysreqs_platform = "ubuntu-22.04")),
+    system_packages = NULL
+  )
+  res__sysreqs_match(self, private)
+
+  # the raw `SystemRequirements` string is kept for all of them
+  expect_equal(self$result$sysreqs, c("libcurl", "libxml2", "openssl"))
+
+  # but no system packages, and no commands, for the manylinux binary
+  expect_null(self$result$sysreqs_packages[[1]])
+  expect_equal(self$result$sysreqs_pre_install[[1]], "")
+  expect_equal(self$result$sysreqs_install[[1]], "")
+  expect_equal(self$result$sysreqs_post_install[[1]], "")
+
+  # the other two are matched as usual
+  expect_equal(
+    vcapply(self$result$sysreqs_packages[[2]], "[[", "sysreq"),
+    "libxml2"
+  )
+  expect_match(self$result$sysreqs_install[[2]], "libxml2-dev")
+  expect_match(self$result$sysreqs_install[[3]], "libssl-dev")
+})

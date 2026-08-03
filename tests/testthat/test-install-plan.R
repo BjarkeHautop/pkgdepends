@@ -422,3 +422,54 @@ test_that("install package from GH, in subdir", {
   # cache is updated with the source and binary
   check_cache()
 })
+
+test_that("plan_sysreqs_suppressed", {
+  ppm <- "https://p3m.dev/cran/__linux__/manylinux_2_28/latest"
+  plan <- data_frame(
+    package = c("A", "B", "C", "D"),
+    mirror = c(ppm, "https://p3m.dev/cran/__linux__/noble/latest", ppm, ppm),
+    sysreqs = c("libcurl", "libcurl", NA_character_, "")
+  )
+  expect_true(plan_sysreqs_suppressed(plan, 1L))
+  # not a manylinux repo
+  expect_false(plan_sysreqs_suppressed(plan, 2L))
+  # nothing was declared, so nothing was suppressed
+  expect_false(plan_sysreqs_suppressed(plan, 3L))
+  expect_false(plan_sysreqs_suppressed(plan, 4L))
+
+  # a plan created from a lock file has no `mirror` column
+  plan$mirror <- NULL
+  expect_false(plan_sysreqs_suppressed(plan, 1L))
+})
+
+test_that("handle_install_needs_build warns about skipped sysreqs", {
+  local_cli_config()
+  # A was supposed to be a self-contained manylinux binary, so we did not
+  # install its system requirements, but now we have to build it.
+  plan <- data_frame(
+    package = "A",
+    version = "1.0.0",
+    binary = TRUE,
+    needscompilation = "no",
+    mirror = "https://p3m.dev/cran/__linux__/manylinux_2_28/latest",
+    sysreqs = "libcurl",
+    dependencies = list(character()),
+    deps = list(data_frame(package = character(), type = character())),
+    dep_types = list(pkg_dep_types_hard()),
+    build_done = TRUE,
+    install_done = FALSE,
+    worker_id = NA_character_,
+    deps_left = list(character())
+  )
+  state <- list(plan = plan, workers = list(), config = list())
+  worker <- list(
+    task = list(args = list(pkgidx = 1L)),
+    result = structure(
+      list(needscompilation = "yes"),
+      class = "install_needs_build"
+    )
+  )
+
+  expect_snapshot(state <- handle_install_needs_build(state, worker))
+  expect_false(state$plan$binary[[1]])
+})
