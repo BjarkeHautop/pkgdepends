@@ -101,3 +101,14 @@
       ! Failed to build goodbuild 1.0.0
       v Summary:   2 new
 
+# handle_install_needs_build warns about skipped sysreqs
+
+    Code
+      state <- handle_install_needs_build(state, worker)
+    Message
+      i A 1.0.0 was served as a source package,
+      will build it from source
+      ! Did not install the system requirements of A, because it was supposed to be a
+      self-contained binary package. If the build fails, you might need to install
+      them manually: "libcurl".
+

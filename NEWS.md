@@ -3,6 +3,14 @@
 * GitHub, GitLab and `git::` remotes now allow trailing
   slashes, e.g. `github::r-lib/pkgdepends/`
   (https://github.com/r-lib/pkgdepends/issues/477).
+* Directly requested base packages are now ignored with a warning (#478).
+
+* pkgdepends now skips the system requirements of binary packages that come
+  from a Posit Package Manager `manylinux` repository
+  (https://github.com/r-lib/pak/issues/815).
+
+* Blank lines in `.Rbuildignore` no longer cause all git submodules of a
+  package to be skipped, empty lines are now dropped (#480).
 
 * Duplicate system requirement commands (`pre_install` and `post_install`)
   are now deduplicated (https://github.com/r-lib/pak/issues/888).

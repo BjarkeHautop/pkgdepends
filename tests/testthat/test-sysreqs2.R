@@ -241,3 +241,56 @@ test_that("sysreqs2_scripts deduplicates repeated pre/post_install commands", {
   expect_equal(scripts$post_install, post)
   expect_true(rust %in% scripts$pre_install)
 })
+
+test_that("is_ppm_manylinux_repo", {
+  expect_true(is_ppm_manylinux_repo(
+    "https://p3m.dev/cran/__linux__/manylinux_2_28/latest"
+  ))
+  # trailing slash, dated snapshot, other PPM host, future manylinux version
+  expect_true(is_ppm_manylinux_repo(
+    "https://p3m.dev/cran/__linux__/manylinux_2_28/latest/"
+  ))
+  expect_true(is_ppm_manylinux_repo(
+    "https://packagemanager.posit.co/cran/__linux__/manylinux_2_28/2026-01-01"
+  ))
+  expect_true(is_ppm_manylinux_repo(
+    "https://p3m.dev/cran/__linux__/manylinux_2_34/latest"
+  ))
+
+  # a regular PPM Linux repo, a plain CRAN-like repo, and no repo at all
+  expect_false(is_ppm_manylinux_repo(
+    "https://p3m.dev/cran/__linux__/noble/latest"
+  ))
+  expect_false(is_ppm_manylinux_repo("https://cran.r-project.org"))
+  expect_false(is_ppm_manylinux_repo(NA_character_))
+
+  # vectorized, including the zero length case
+  expect_equal(
+    is_ppm_manylinux_repo(c(
+      "https://p3m.dev/cran/__linux__/manylinux_2_28/latest",
+      "https://p3m.dev/cran/__linux__/jammy/latest",
+      NA_character_
+    )),
+    c(TRUE, FALSE, FALSE)
+  )
+  expect_equal(is_ppm_manylinux_repo(character()), logical())
+})
+
+test_that("binary_needs_no_sysreqs", {
+  ppm <- "https://p3m.dev/cran/__linux__/manylinux_2_28/latest"
+  expect_true(binary_needs_no_sysreqs("x86_64-pc-linux-gnu", ppm))
+  # PPM uses an empty platform string for packages that need no compilation
+  expect_true(binary_needs_no_sysreqs("", ppm))
+
+  # source packages from the same repo do need their system requirements
+  expect_false(binary_needs_no_sysreqs("source", ppm))
+  # binaries from anywhere else are unaffected
+  expect_false(binary_needs_no_sysreqs(
+    "x86_64-pc-linux-gnu",
+    "https://p3m.dev/cran/__linux__/noble/latest"
+  ))
+  expect_false(binary_needs_no_sysreqs("x86_64-pc-linux-gnu", NA_character_))
+  expect_false(binary_needs_no_sysreqs(NA_character_, ppm))
+
+  expect_equal(binary_needs_no_sysreqs(character(), character()), logical())
+})
