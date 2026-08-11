@@ -446,7 +446,7 @@ pd$get_config()
 #> 
 #> ## metadata_cache_dir
 #> <default>
-#> [1] "/tmp/RtmpJOT7C1/file1dee77070a9"
+#> [1] "/tmp/RtmpJuJErV/file250a94607e3"
 #> 
 #> ## configure_args
 #> <default>
@@ -467,11 +467,11 @@ pd$get_config()
 #> 
 #> ## cache_dir
 #> <default>
-#> [1] "/tmp/RtmpJOT7C1/file1dee760bd44b"
+#> [1] "/tmp/RtmpJuJErV/file250a6cc96f24"
 #> 
 #> ## library
 #> <set>
-#> [1] "/tmp/RtmpJOT7C1/file1dee14289bfd"
+#> [1] "/tmp/RtmpJuJErV/file250a46457fdc"
 #> 
 #> ## ignore_dev_library
 #> <default>
@@ -558,7 +558,7 @@ pd$get_config()
 pd <- new_pkg_deps("pak")
 pd$resolve()
 #> 
-#> ✔ Updated metadata database: 4.13 MB in 3 files.
+#> ✔ Updated metadata database: 4.18 MB in 3 files.
 #> 
 #> ℹ Updating metadata database
 #> ✔ Updating metadata database ... done
